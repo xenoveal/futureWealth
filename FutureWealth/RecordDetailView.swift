@@ -6,22 +6,56 @@
 //
 
 import SwiftUI
+import CoreData
 
-struct RecordDetail: View {
+
+struct RecordDetailView: View {
     @Environment(\.managedObjectContext) var managedObjectContext
     
-    @FetchRequest(
-        entity: Log.entity(),
-        sortDescriptors: [NSSortDescriptor(keyPath: \Log.date, ascending: false )],
-        predicate: NSPredicate(format: "category == %@", "All Investments")
-    ) var logs: FetchedResults<Log>
-    
     @State var showingAlert:Bool = false
+    @State private var logSelected: Int?
     
-    let instrument:String
+    let instrument: String
+    let category: Category
+    var logs: [Log] {
+        var categoryLog = category.toLog?.allObjects as? [Log]
+        categoryLog?.sort {
+            $0.date! > $1.date!
+        }
+        if(categoryLog != nil){
+            return categoryLog!
+        }else{
+            return []
+            
+        }
+    }
+    
+    func removeLog(logIndex: Int) {
+        let log = logs[logIndex]
+        if(category.toLog!.count<1){
+            LogController.shared.delete(category)
+        }
+        else{
+            if(logIndex == 0){
+                category.currentCapital = logs[1].capital
+            }
+            LogController.shared.delete(log)
+        }
+        
+    }
+    
+    func calcChange(logCapital: Double, index: Int) -> String{
+        if(index==logs.count-1){ return "0.0" }
+        let previousLogCapital = logs[index+1].capital
+        let change = (logCapital-previousLogCapital)/previousLogCapital
+
+        return String(format: "%.0f", change*100)
+    }
     
     
     var body: some View {
+//        let withIndex = logs.enumerated().map({ $0 })
+//        let withIndex = Array(zip(logs.indices, logs)
         
         ZStack {
             Color(color_primary).ignoresSafeArea()
@@ -33,64 +67,63 @@ struct RecordDetail: View {
                 Text("All Investments").foregroundColor(Color(color_thrid))
                     .font(Font.custom("SF Compact", size: 20))
                 List{
-                    ForEach(logs, id: \.self){ log in
+                    ForEach(Array(zip(logs.indices, logs)), id: \.1){ index, log in
+//                        let log=logs[index]
                         VStack{
                             RecordDetailCard(
                                 date: formatDate(date: log.date ?? Date()),
-                                change: "0.4", capital: String(log.capital)
+                                change: calcChange(logCapital: log.capital, index: index), capital: log.capital
                             )
                                 .background(Color(color_primary))
                         }
                         .listRowInsets(EdgeInsets())
+                        .listRowSeparator(.hidden)
                         .frame(height: 95)
                         .background(Color(color_primary))
+                        .swipeActions(content: {
+                            Button(action: {
+                                showingAlert.toggle()
+                                self.logSelected = index
+                            }, label: {
+                                Image("delete")
+                            })
+                            .tint(Color(color_primary))
+                        })
                         
                     }
-                    .swipeActions(content: {
-                        Button(action: {
-                            showingAlert = true
-                        }, label: {
-                            Image("delete")
-                        })
-                        .tint(Color(color_primary))
-                    })
+//                    .onDelete(perform: removeLog)
+                        
+                        .alert("Delete This Log?", isPresented: $showingAlert){
+                            Button("Delete", role: .destructive){
+//                                print(self.logSelected ?? Log())
+                                removeLog(logIndex: self.logSelected ?? 0)
+                            }
+                        }
                         
                 }
                 .listStyle(PlainListStyle())
                 
             }
             .padding(30)
-            .alert("Delete This Log?", isPresented: $showingAlert){
-                Button("Delete", role: .destructive){
-                    
-                }
-            }
-            
-//            .alert(isPresented: $showingAlert){
-//                Alert(
-//                    title: Text("Delete This Log?"),
-//                    primaryButton: .destructive(Text("Delete")),
-//                    secondaryButton: .cancel()
-//                )
-//
-//            }
         }
     }
 }
 
 
 struct RecordDetail_Previews: PreviewProvider {
+//    @State static var openRecordSheet:Bool = true
     static var previews: some View {
-        RecordDetail()
+        RecordDetailView(instrument: "PancakeSwap", category: Category())
     }
 }
 
 struct RecordDetailCard: View {
     let date:String
     let change:String
-    let capital:String
+    let capital:Double
     
     var body: some View {
+        let capitalFormatted = String(format: "%.0f", capital)
         ZStack{
             
             Color(color_secondary).opacity(0.15).frame(minWidth: 330, maxHeight:83).cornerRadius(10)
@@ -99,7 +132,7 @@ struct RecordDetailCard: View {
                     Image(systemName: "calendar")
                         .foregroundColor(Color(color_secondary))
                         .font(Font.custom("SF Compact", size: 14))
-                    Text("04/22/2022").foregroundColor(Color(additional_color))
+                    Text(date).foregroundColor(Color(additional_color))
                         .font(Font.custom("SF Compact", size: 12))
                 }
                 HStack(spacing: 15){
@@ -120,7 +153,7 @@ struct RecordDetailCard: View {
                             .foregroundColor(Color(color_secondary))
                             .font(Font.system(size: 20, weight: .bold))
                         HStack {
-                            Text("5,000").foregroundColor(Color(color_secondary))
+                            Text(capitalFormatted).foregroundColor(Color(color_secondary))
                                 .font(Font.custom("SF Compact", size: 20))
                             Text("Capital").foregroundColor(Color(additional_color))
                                 .font(Font.custom("SF Compact", size: 12))
@@ -146,7 +179,7 @@ struct RecordDetailCard: View {
 private func formatDate(date:Date) -> String{
     
     let dateFormatter = DateFormatter()
-    dateFormatter.dateFormat = "mm/DD/YYYY"
+    dateFormatter.dateFormat = "MM/dd/YYYY  •  hh:mma"
     return dateFormatter.string(from: date)
 
 }

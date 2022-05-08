@@ -13,6 +13,25 @@ let color_thrid = UIColor(red: 0.39, green: 0.82, blue: 1.00, alpha: 1.00)
 let additional_color = UIColor(red: 0.78, green: 0.78, blue: 0.80, alpha: 1.00)
 let disabled_color = UIColor(red: 0.6, green: 0.6, blue: 0.6, alpha: 1.00)
 
+extension Date {
+
+    /// Create a date from specified parameters
+    ///
+    /// - Parameters:
+    ///   - year: The desired year
+    ///   - month: The desired month
+    ///   - day: The desired day
+    /// - Returns: A `Date` object
+    static func from(year: Int, month: Int, day: Int) -> Date? {
+        let calendar = Calendar(identifier: .gregorian)
+        var dateComponents = DateComponents()
+        dateComponents.year = year
+        dateComponents.month = month
+        dateComponents.day = day
+        return calendar.date(from: dateComponents) ?? nil
+    }
+}
+
 struct HomepageView: View {
     @Environment(\.managedObjectContext) var managedObjectContext
     
@@ -23,17 +42,63 @@ struct HomepageView: View {
 //        predicate: NSPredicate(format: "category == %@", "All Investments")
     ) var categories: FetchedResults<Category>
     
+    func getTotalCapital(categoryData:FetchedResults<Category>) -> Double {
+        var total: Double = 0.0
+        for c in categoryData {
+            total+=c.currentCapital
+        }
+        return total
+    }
+    
+    func getOneWeekCapital(categoryData:FetchedResults<Category>, startDate:Date, endDate: Date) -> Double {
+        var total: Double = 0.0
+        var logs: [Log]
+        var capitalPerCategory: Double
+        var earliestDate: Date
+        
+        for c in categoryData {
+            logs = c.toLog?.allObjects as! [Log]
+            capitalPerCategory = 0.0
+            earliestDate = Date.from(year: 2000, month: 10, day: 10) ?? Date()
+            
+            for log in logs.reversed() {
+                if let date = log.date {
+                    if(startDate<=date && date<=endDate && date>earliestDate){
+                        capitalPerCategory = log.capital
+                        earliestDate = date
+                    }
+                    
+                }
+            }
+            
+            total+=capitalPerCategory
+        }
+        return total
+    }
+    
+    
    
     var body: some View {
 //        Button(type(of: categories)){
 //            print(type(of: categories))
 //        }
+        let totalCapital = getTotalCapital(categoryData: categories)
+        
+        let calendar = Calendar.current
+        let currentDate = calendar.dateComponents([.day, .month, .year, .calendar], from: Date()).date
+        let oneWeekBeforeDate = calendar.date(byAdding: .day, value: -7, to: Date())
+        
+        
+        let lastWeekProfit = totalCapital-getOneWeekCapital(categoryData: categories, startDate: oneWeekBeforeDate ?? Date(), endDate: currentDate ?? Date())
         ZStack{
             Color(color_primary).ignoresSafeArea()
             VStack(alignment: .leading, spacing: 35){
-                PortfolioSummaryView()
+                PortfolioSummaryView(
+                    totalCapital: totalCapital,
+                    lastWeekProfit: lastWeekProfit
+                )
                 if categories.count>0{
-                    InvestmentAllocationView(categories: categories)
+                    InvestmentAllocationView(categories: categories, totalCapital: totalCapital)
                     
                 }
                 RecordView()
@@ -55,8 +120,16 @@ struct HomepageView_Previews: PreviewProvider {
 }
 
 struct PortfolioSummaryView: View {
+    let totalCapital:Double
+    let lastWeekProfit: Double
     
     var body: some View {
+        let formattedCapital:String = String(format: "%.0f", totalCapital)
+        let formattedLastWeekProfit:String = String(format: "%.0f", lastWeekProfit)
+        let lastWeekProfitPercentage = String(format: "%.0f", lastWeekProfit/totalCapital*100)
+        let APR = String(format: "%.1f", ((lastWeekProfit/totalCapital)-1)*5214.2857)
+        let currentDate = formatDate(date: Date.now)
+        
         ZStack{
             Color(color_secondary).opacity(0.05).frame(maxHeight:197)
             VStack(alignment: .leading, spacing: 25){
@@ -75,8 +148,8 @@ struct PortfolioSummaryView: View {
                             
                         }
                         VStack(spacing: 8){
-                            Text("$5 (0.5%)").foregroundColor(Color(color_thrid)).font(.custom("SF Compact", size: 20))
-                            Text("Updated: 04/16").foregroundColor(Color(additional_color)).font(.custom("SF Compact", size: 12))
+                            Text("$\(formattedLastWeekProfit) (\(lastWeekProfitPercentage)%)").foregroundColor(Color(color_thrid)).font(.custom("SF Compact", size: 20))
+                            Text("Updated: \(currentDate)").foregroundColor(Color(additional_color)).font(.custom("SF Compact", size: 12))
                             
                             
                         }
@@ -89,7 +162,7 @@ struct PortfolioSummaryView: View {
                                 .foregroundColor(Color(color_secondary))
                                 .font(Font.system(size: 20, weight: .bold))
                             VStack(alignment:.leading){
-                                Text("60%").foregroundColor(Color(color_thrid)).font(.custom("SF Compact", size: 20))
+                                Text("\(APR)%").foregroundColor(Color(color_thrid)).font(.custom("SF Compact", size: 20))
                                 Text("APR").foregroundColor(Color(color_secondary)).font(.custom("SF Compact", size: 12))
                             }
                             
@@ -100,7 +173,7 @@ struct PortfolioSummaryView: View {
                                 .foregroundColor(Color(color_secondary))
                                 .font(Font.system(size: 20, weight: .bold))
                             VStack(alignment:.leading){
-                                Text("$5,000").foregroundColor(Color(color_thrid)).font(.custom("SF Compact", size: 20))
+                                Text("$\(formattedCapital)").foregroundColor(Color(color_thrid)).font(.custom("SF Compact", size: 20))
                                 Text("Total Capital").foregroundColor(Color(additional_color)).font(.custom("SF Compact", size: 12))
                             }
                             
@@ -115,6 +188,7 @@ struct PortfolioSummaryView: View {
 
 struct InvestmentAllocationView: View {
     let categories:FetchedResults<Category>
+    let totalCapital: Double
 
     var body: some View {
         VStack(alignment: .leading){
@@ -123,9 +197,8 @@ struct InvestmentAllocationView: View {
                 HStack{
                     ForEach(categories, id: \.self){ category in
                         AllocationCard(
-                            capital: category.currentCapital,
-                            category: category.name!,
-                            instrument: category.instrument!
+                            category: category,
+                            totalCapital: totalCapital
                         )
                     }
                     
@@ -180,7 +253,7 @@ struct RecordView: View {
             .foregroundColor(Color(color_thrid))
             .cornerRadius(10)
             .font(Font.custom("CF Compact", size: 16))
-            .sheet(isPresented: $openForm, content: {FormSheet(openForm: $openForm ,instrument: selectedInstrument)})
+            .sheet(isPresented: $openForm, content: {FormSheetView(openForm: $openForm ,instrument: selectedInstrument)})
         }
         .padding(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
         Spacer()
@@ -188,19 +261,19 @@ struct RecordView: View {
 }
 
 struct AllocationCard: View {
-//    let category:Category
-    let capital:Double
-    let category:String
-    let instrument:String
-    
+    let category:Category
+    let totalCapital: Double
     
     @State var openRecordSheet:Bool = false
     var body: some View {
 //        let capitalFormatted = (capital * 1000).rounded() / 1000
-        let capitalFormatted = String(format: "%.0f", capital)
+        let capitalFormatted = String(format: "%.0f", category.currentCapital)
+        let allocationPercentage = String(format: "%.0f", category.currentCapital/totalCapital*100)
+        
+        //50,000
         
         VStack{
-            Image(instrument.lowercased())
+            Image(category.instrument?.lowercased() ?? "")
                 .resizable()
                 .scaledToFill()
                 .frame(width: 35, height: 35, alignment: .center)
@@ -208,7 +281,7 @@ struct AllocationCard: View {
                 ZStack{
                     Color(color_secondary).cornerRadius(10).frame(minWidth: 128, maxHeight:68).opacity(0.1)
                     VStack(spacing: 7){
-                        Text("50%").foregroundColor(Color(color_secondary))
+                        Text("\(allocationPercentage)%").foregroundColor(Color(color_secondary))
                             .font(Font.custom("SF Compact", size: 20))
                         Text("or \(capitalFormatted)USD")
                             .foregroundColor(Color(additional_color))
@@ -217,42 +290,25 @@ struct AllocationCard: View {
                 }
                 
             }
-            Text("All Investments").foregroundColor(Color(color_secondary))
+            Text(category.name ?? "").foregroundColor(Color(color_secondary))
                 .font(Font.custom("SF Compact", size: 12))
         }
         .sheet(isPresented: $openRecordSheet, content: {
-            RecordDetail(instrument: instrument)
+            RecordDetailView(instrument: category.instrument ?? "", category: category)
         })
         .onTapGesture {
+//            for category in categories{
+//                LogController.shared.delete(category)
+//            }
             openRecordSheet.toggle()
         }
     }
 }
 
-extension String {
-
-    var length: Int {
-        return count
-    }
-
-    subscript (i: Int) -> String {
-        return self[i ..< i + 1]
-    }
-
-    func substring(fromIndex: Int) -> String {
-        return self[min(fromIndex, length) ..< length]
-    }
-
-    func substring(toIndex: Int) -> String {
-        return self[0 ..< max(0, toIndex)]
-    }
-
-    subscript (r: Range<Int>) -> String {
-        let range = Range(uncheckedBounds: (lower: max(0, min(length, r.lowerBound)),
-                                            upper: min(length, max(0, r.upperBound))))
-        let start = index(startIndex, offsetBy: range.lowerBound)
-        let end = index(start, offsetBy: range.upperBound - range.lowerBound)
-        return String(self[start ..< end])
-    }
+private func formatDate(date:Date) -> String{
     
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "MM/dd"
+    return dateFormatter.string(from: date)
+
 }

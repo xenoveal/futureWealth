@@ -5,7 +5,7 @@
         <attribute name="currentCapital" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="instrument" optional="YES" attributeType="String"/>
         <attribute name="name" optional="YES" attributeType="String"/>
-        <relationship name="toLog" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Log" inverseName="toCategory" inverseEntity="Log"/>
+        <relationship name="toLog" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Log" inverseName="toCategory" inverseEntity="Log"/>
     </entity>
     <entity name="Log" representedClassName="Log" syncable="YES" codeGenerationType="class">
         <attribute name="capital" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>

@@ -7,9 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		712F4E6228186066006E6B59 /* SwiftUIFontIcon in Frameworks */ = {isa = PBXBuildFile; productRef = 712F4E6128186066006E6B59 /* SwiftUIFontIcon */; };
-		712F4E6628199D43006E6B59 /* FormSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 712F4E6528199D43006E6B59 /* FormSheet.swift */; };
-		712F4E6A2819B045006E6B59 /* RecordDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 712F4E692819B045006E6B59 /* RecordDetail.swift */; };
+		712F4E6628199D43006E6B59 /* FormSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 712F4E6528199D43006E6B59 /* FormSheetView.swift */; };
+		712F4E6A2819B045006E6B59 /* RecordDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 712F4E692819B045006E6B59 /* RecordDetailView.swift */; };
+		714650712824F8EB006AF4EB /* ScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 714650702824F8EB006AF4EB /* ScannerView.swift */; };
+		714650732824FB3B006AF4EB /* TextRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 714650722824FB3B006AF4EB /* TextRecognizer.swift */; };
 		717B4BAD281853F800C8D38E /* FutureWealthApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 717B4BAC281853F800C8D38E /* FutureWealthApp.swift */; };
 		717B4BAF281853F800C8D38E /* HomepageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 717B4BAE281853F800C8D38E /* HomepageView.swift */; };
 		717B4BB1281853FA00C8D38E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 717B4BB0281853FA00C8D38E /* Assets.xcassets */; };
@@ -19,8 +20,11 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		712F4E6528199D43006E6B59 /* FormSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormSheet.swift; sourceTree = "<group>"; };
-		712F4E692819B045006E6B59 /* RecordDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordDetail.swift; sourceTree = "<group>"; };
+		712F4E6528199D43006E6B59 /* FormSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormSheetView.swift; sourceTree = "<group>"; };
+		712F4E692819B045006E6B59 /* RecordDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordDetailView.swift; sourceTree = "<group>"; };
+		7146506F2824F847006AF4EB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		714650702824F8EB006AF4EB /* ScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannerView.swift; sourceTree = "<group>"; };
+		714650722824FB3B006AF4EB /* TextRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextRecognizer.swift; sourceTree = "<group>"; };
 		717B4BA9281853F800C8D38E /* FutureWealth.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FutureWealth.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		717B4BAC281853F800C8D38E /* FutureWealthApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FutureWealthApp.swift; sourceTree = "<group>"; };
 		717B4BAE281853F800C8D38E /* HomepageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomepageView.swift; sourceTree = "<group>"; };
@@ -35,7 +39,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				712F4E6228186066006E6B59 /* SwiftUIFontIcon in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -61,14 +64,17 @@
 		717B4BAB281853F800C8D38E /* FutureWealth */ = {
 			isa = PBXGroup;
 			children = (
+				7146506F2824F847006AF4EB /* Info.plist */,
 				7196FA39281AA88100EAE090 /* LogModel.xcdatamodeld */,
 				717B4BAC281853F800C8D38E /* FutureWealthApp.swift */,
 				717B4BAE281853F800C8D38E /* HomepageView.swift */,
-				712F4E692819B045006E6B59 /* RecordDetail.swift */,
+				712F4E692819B045006E6B59 /* RecordDetailView.swift */,
+				714650702824F8EB006AF4EB /* ScannerView.swift */,
+				712F4E6528199D43006E6B59 /* FormSheetView.swift */,
+				7196FA3C281AAB8100EAE090 /* LogController.swift */,
+				714650722824FB3B006AF4EB /* TextRecognizer.swift */,
 				717B4BB0281853FA00C8D38E /* Assets.xcassets */,
 				717B4BB2281853FA00C8D38E /* Preview Content */,
-				712F4E6528199D43006E6B59 /* FormSheet.swift */,
-				7196FA3C281AAB8100EAE090 /* LogController.swift */,
 			);
 			path = FutureWealth;
 			sourceTree = "<group>";
@@ -98,7 +104,6 @@
 			);
 			name = FutureWealth;
 			packageProductDependencies = (
-				712F4E6128186066006E6B59 /* SwiftUIFontIcon */,
 			);
 			productName = FutureWealth;
 			productReference = 717B4BA9281853F800C8D38E /* FutureWealth.app */;
@@ -129,7 +134,6 @@
 			);
 			mainGroup = 717B4BA0281853F800C8D38E;
 			packageReferences = (
-				712F4E6028186066006E6B59 /* XCRemoteSwiftPackageReference "SwiftUIFontIcon" */,
 			);
 			productRefGroup = 717B4BAA281853F800C8D38E /* Products */;
 			projectDirPath = "";
@@ -161,8 +165,10 @@
 				717B4BAF281853F800C8D38E /* HomepageView.swift in Sources */,
 				717B4BAD281853F800C8D38E /* FutureWealthApp.swift in Sources */,
 				7196FA3B281AA88100EAE090 /* LogModel.xcdatamodeld in Sources */,
-				712F4E6628199D43006E6B59 /* FormSheet.swift in Sources */,
-				712F4E6A2819B045006E6B59 /* RecordDetail.swift in Sources */,
+				714650732824FB3B006AF4EB /* TextRecognizer.swift in Sources */,
+				712F4E6628199D43006E6B59 /* FormSheetView.swift in Sources */,
+				714650712824F8EB006AF4EB /* ScannerView.swift in Sources */,
+				712F4E6A2819B045006E6B59 /* RecordDetailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -294,11 +300,12 @@
 				DEVELOPMENT_TEAM = SPA6U35XFL;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FutureWealth/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -323,11 +330,12 @@
 				DEVELOPMENT_TEAM = SPA6U35XFL;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FutureWealth/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -363,25 +371,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		712F4E6028186066006E6B59 /* XCRemoteSwiftPackageReference "SwiftUIFontIcon" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/huybuidac/SwiftUIFontIcon";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.0.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		712F4E6128186066006E6B59 /* SwiftUIFontIcon */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 712F4E6028186066006E6B59 /* XCRemoteSwiftPackageReference "SwiftUIFontIcon" */;
-			productName = SwiftUIFontIcon;
-		};
-/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		7196FA39281AA88100EAE090 /* LogModel.xcdatamodeld */ = {

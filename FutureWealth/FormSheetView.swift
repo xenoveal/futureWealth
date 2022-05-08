@@ -20,13 +20,23 @@ extension View {
     }
 }
 
-struct FormSheet: View {
+struct FormSheetView: View {
     @Binding var openForm:Bool
     @Environment(\.managedObjectContext) var managedObjectContext
     
+    @State private var showScanner = true
+//    @State private var texts:[String] = []
+    
     let instrument:String
     
-    @State var categories:[String] = ["All Investments", "Other"]
+    @FetchRequest(
+        entity: Category.entity(),
+        sortDescriptors: [NSSortDescriptor(keyPath: \Category.currentCapital, ascending: false )]
+//        ,
+//        predicate: NSPredicate(format: "category == %@", "All Investments")
+    ) var categories: FetchedResults<Category>
+    
+//    @State var categories:[String] = ["All Investments", "Other"]
     @State var capital:String=""
     @State var category:String="All Investments"
     @State var newCategory:String=""
@@ -40,7 +50,7 @@ struct FormSheet: View {
         ZStack{
             Color(color_primary).ignoresSafeArea()
             VStack(alignment: .leading, spacing: 26){
-                Image("pancakeswap")
+                Image(instrument.lowercased())
                     .resizable()
                     .scaledToFill()
                     .frame(width: 45, height: 45, alignment: .center)
@@ -63,10 +73,16 @@ struct FormSheet: View {
                     GeometryReader { proxy in
                         Menu(category){
                             Picker(selection: $category, label: EmptyView()) {
+                                Text("All Investments")
+                                    .tag("All Investments")
                                 ForEach(categories, id: \.self) { c in
-                                    Text(c)
-                                        .tag(c)
+                                    if(c.name != "All Investments" && c.instrument == instrument){
+                                        Text(c.name ?? "")
+                                            .tag(c.name ?? "")
+                                    }
                                 }
+                                Text("Other")
+                                    .tag("Other")
                             }
                             
                         }
@@ -115,14 +131,34 @@ struct FormSheet: View {
                     log.note = note
                     log.date = Date.now
                     log.category = category
-                    let c = Category(context: managedObjectContext)
-                    c.category_id = UUID()
-                    if(category=="Other"){ c.name = category }
-                    else { c.name = newCategory }
-                    c.currentCapital = Double(capital) ?? 0.0
-                    c.instrument = instrument
-                    log.toCategory = c
-                    c.toLog = [log]
+                    
+                    var c:Category
+                    var found = false
+                    
+                    for eachCategory in categories {
+                        if (
+                        (eachCategory.name == category
+                         || eachCategory.name == newCategory) &&
+                        eachCategory.instrument == instrument
+                        ){
+                            c = eachCategory
+                            c.toLog?.addingObjects(from: [log])
+                            c.currentCapital = Double(capital) ?? 0.0
+                            log.toCategory = c
+                            found = true
+                            break
+                        }
+                    }
+                    if(!found){
+                        c = Category(context: managedObjectContext)
+                        c.category_id = UUID()
+                        if(category=="Other"){ c.name = newCategory }
+                        else { c.name = category }
+                        c.instrument = instrument
+                        c.toLog = [log]
+                        c.currentCapital = Double(capital) ?? 0.0
+                        log.toCategory = c
+                    }
                     LogController.shared.save()
                     openForm = false
                     
@@ -138,14 +174,57 @@ struct FormSheet: View {
                 .font(Font.custom("CF Compact", size: 16))
             }
             .padding(30)
+            .sheet(isPresented: $showScanner, content: {
+                makeScannerView()
+            })
                 
         }
+        
+    }
+    private func makeScannerView() -> ScannerView {
+        ScannerView(completion: {
+            textPerPage in
+            if let outputText = textPerPage?.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines){
+                let perText = outputText.components(separatedBy: "\n")
+                var totalCap:Double = 0
+                for text in perText {
+                    if(text.contains("~") && instrument == "PancakeSwap"){
+                        var parsed = text.replacingOccurrences(of: "~", with: "")
+                        parsed = parsed.replacingOccurrences(of: " USD", with: "")
+                        print(parsed)
+                        if let cap = Double(parsed){
+                            totalCap+=cap
+                        }
+                    }
+                    if((text.contains("Earn ") || text.contains("-"))
+                       && instrument == "PancakeSwap"){
+                        var found = false
+                        for i in 0..<self.categories.count {
+                            let c = categories[i]
+                            if(c.name == text && c.instrument == "PancakeSwap"){
+                                self.category = text
+                                found = true
+                            }
+                        }
+                        if(!found){
+                            self.category = "Other"
+                            let parsed = text.replacingOccurrences(of: "LP STAKED", with: "")
+                            self.newCategory = parsed
+                        }
+                        
+                    }
+                }
+                self.capital = String(format: "%.2f", totalCap)
+                print(self.capital)
+            }
+            self.showScanner = false
+        })
     }
 }
 
 struct SwiftUIView_Previews: PreviewProvider {
     @State static var openForm:Bool = true
     static var previews: some View {
-        FormSheet(openForm: $openForm, instrument: "PancakeSwap")
+        FormSheetView(openForm: $openForm, instrument: "PancakeSwap")
     }
 }
