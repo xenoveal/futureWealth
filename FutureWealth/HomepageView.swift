@@ -124,10 +124,10 @@ struct PortfolioSummaryView: View {
     let lastWeekProfit: Double
     
     var body: some View {
-        let formattedCapital:String = String(format: "%.0f", totalCapital)
-        let formattedLastWeekProfit:String = String(format: "%.0f", lastWeekProfit)
-        let lastWeekProfitPercentage = String(format: "%.0f", lastWeekProfit/totalCapital*100)
-        let APR = String(format: "%.1f", ((lastWeekProfit/totalCapital)-1)*5214.2857)
+        let formattedCapital:String = String(format: "%.2f", totalCapital)
+        let formattedLastWeekProfit:String = String(format: "%.1f", lastWeekProfit)
+        let lastWeekProfitPercentage = String(format: "%.1f", lastWeekProfit/totalCapital*100)
+        let APR = String(format: "%.1f", lastWeekProfit/totalCapital*100/7*360)
         let currentDate = formatDate(date: Date.now)
         
         ZStack{

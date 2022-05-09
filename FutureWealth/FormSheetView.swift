@@ -191,7 +191,7 @@ struct FormSheetView: View {
                     if(text.contains("~") && instrument == "PancakeSwap"){
                         var parsed = text.replacingOccurrences(of: "~", with: "")
                         parsed = parsed.replacingOccurrences(of: " USD", with: "")
-                        print(parsed)
+//                        print(parsed)
                         if let cap = Double(parsed){
                             totalCap+=cap
                         }
@@ -208,7 +208,9 @@ struct FormSheetView: View {
                         }
                         if(!found){
                             self.category = "Other"
-                            let parsed = text.replacingOccurrences(of: "LP STAKED", with: "")
+                            var parsed = text.replacingOccurrences(of: "LP STAKED", with: "")
+                            parsed = parsed.replacingOccurrences(of: " ", with: "")
+                            parsed = parsed.replacingOccurrences(of: "Earn", with: "Earn ")
                             self.newCategory = parsed
                         }
                         

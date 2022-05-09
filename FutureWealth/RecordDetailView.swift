@@ -32,7 +32,7 @@ struct RecordDetailView: View {
     
     func removeLog(logIndex: Int) {
         let log = logs[logIndex]
-        if(category.toLog!.count<1){
+        if(category.toLog!.count<=1){
             LogController.shared.delete(category)
         }
         else{
@@ -123,7 +123,7 @@ struct RecordDetailCard: View {
     let capital:Double
     
     var body: some View {
-        let capitalFormatted = String(format: "%.0f", capital)
+        let capitalFormatted = String(format: "%.2f", capital)
         ZStack{
             
             Color(color_secondary).opacity(0.15).frame(minWidth: 330, maxHeight:83).cornerRadius(10)
@@ -142,7 +142,7 @@ struct RecordDetailCard: View {
                             .font(Font.system(size: 20, weight: .bold))
                         HStack {
                             Text("\(change)%").foregroundColor(Color(color_secondary))
-                                .font(Font.custom("SF Compact", size: 20))
+                                .font(Font.custom("SF Compact", size: 16))
                             Text("Change").foregroundColor(Color(additional_color))
                                 .font(Font.custom("SF Compact", size: 12))
                         }
@@ -154,7 +154,7 @@ struct RecordDetailCard: View {
                             .font(Font.system(size: 20, weight: .bold))
                         HStack {
                             Text(capitalFormatted).foregroundColor(Color(color_secondary))
-                                .font(Font.custom("SF Compact", size: 20))
+                                .font(Font.custom("SF Compact", size: 16))
                             Text("Capital").foregroundColor(Color(additional_color))
                                 .font(Font.custom("SF Compact", size: 12))
                         }
